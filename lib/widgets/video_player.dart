@@ -10,7 +10,7 @@ class AssetVideoPlayer extends StatefulWidget {
 
 class _AssetVideoPlayerState extends State<AssetVideoPlayer> {
   VideoPlayerController _controller;
-
+  Future<void> _initializeVideoPlayerFuture;
   @override
   void initState() {
     super.initState();
@@ -19,9 +19,8 @@ class _AssetVideoPlayerState extends State<AssetVideoPlayer> {
     _controller.addListener(() {
       setState(() {});
     });
-    _controller.setLooping(true);
+    _initializeVideoPlayerFuture = _controller.initialize();
     _controller.initialize().then((_) => setState(() {}));
-    _controller.play();
   }
 
   @override
@@ -32,29 +31,31 @@ class _AssetVideoPlayerState extends State<AssetVideoPlayer> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        children: <Widget>[
-          Container(
-            padding: const EdgeInsets.only(top: 20.0),
-          ),
-          const Text('With assets mp4'),
-          Container(
-            padding: const EdgeInsets.all(20),
-            child: AspectRatio(
-              aspectRatio: _controller.value.aspectRatio,
-              child: Stack(
-                alignment: Alignment.bottomCenter,
-                children: <Widget>[
-                  VideoPlayer(_controller),
-                  _ControlsOverlay(controller: _controller),
-                  VideoProgressIndicator(_controller, allowScrubbing: true),
-                ],
-              ),
+    return FutureBuilder(
+      future: _initializeVideoPlayerFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          // If the VideoPlayerController has finished initialization, use
+          // the data it provides to limit the aspect ratio of the video.
+          return AspectRatio(
+            aspectRatio: _controller.value.aspectRatio,
+            // Use the VideoPlayer widget to display the video.
+            child: Stack(
+              alignment: Alignment.bottomCenter,
+              children: <Widget>[
+                VideoPlayer(_controller),
+                _ControlsOverlay(controller: _controller),
+              ],
             ),
-          ),
-        ],
-      ),
+
+            // VideoPlayer(_controller),
+          );
+        } else {
+          // If the VideoPlayerController is still initializing, show a
+          // loading spinner.
+          return Center(child: CircularProgressIndicator());
+        }
+      },
     );
   }
 }

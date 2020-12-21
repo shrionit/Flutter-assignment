@@ -1,7 +1,7 @@
-import 'package:audio_widget/audio_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_assignment/models/message.dart';
 import 'package:flutter_assignment/models/user.dart';
+import 'package:flutter_assignment/widgets/audio_player.dart';
 import 'package:flutter_assignment/widgets/video_player.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -165,23 +165,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   ]
                 : message.audio != null
                     ? <Widget>[
-                        Align(
-                          alignment: Alignment.center,
-                          child: Audio.assets(
-                            path: message.audio,
-                            play: _playAudio,
-                            child: RaisedButton(
-                              child: Text(
-                                _playAudio ? "pause" : "play",
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  _playAudio = !_playAudio;
-                                });
-                              },
-                            ),
-                          ),
-                        ),
+                        AssetAudioPlayer(audiosrc: message.audio),
                         Align(
                           alignment:
                               isMe ? Alignment.topRight : Alignment.topLeft,
